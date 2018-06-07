@@ -7,7 +7,7 @@ import com.alibaba.excel.metadata.BaseRowModel;
  * Created with IntelliJ IDEA
  *
  * @Author yuanhaoyue swithaoy@gmail.com
- * @Description
+ * @Description 导出 Excel 时使用的映射实体类，Excel 模型
  * @Date 2018-06-06
  * @Time 17:03
  */

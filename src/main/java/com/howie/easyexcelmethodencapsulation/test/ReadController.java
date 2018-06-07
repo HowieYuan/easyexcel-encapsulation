@@ -27,20 +27,42 @@ public class ReadController {
     }
 
     @RequestMapping(value = "writeExcel", method = RequestMethod.GET)
-    public void writeExcel(HttpServletResponse response, String fileName, String sheetName) throws IOException {
+    public void writeExcel(HttpServletResponse response) throws IOException {
+        List<ExportInfo> list = getList();
+        String fileName = "一个 Excel 文件";
+        String sheetName = "第一个 sheet";
+
+        ExcelUtil.writeExcelWithSheets(response, list, fileName, sheetName, new ExportInfo());
+    }
+
+    @RequestMapping(value = "writeExcelWithSheet", method = RequestMethod.GET)
+    public void writeExcelWithSheets(HttpServletResponse response) throws IOException {
+        List<ExportInfo> list = getList();
+        String fileName = "一个 Excel 文件";
+        String sheetName1 = "第一个 sheet";
+        String sheetName2 = "第二个 sheet";
+        String sheetName3 = "第三个 sheet";
+
+        ExcelUtil.writeExcelWithSheets(response, list, fileName, sheetName1, new ExportInfo())
+                .write(list, sheetName2, new ExportInfo())
+                .write(list, sheetName3, new ExportInfo())
+                .finish();
+    }
+
+    private List<ExportInfo> getList() {
         List<ExportInfo> list = new ArrayList<>();
         ExportInfo model1 = new ExportInfo();
-        model1.setName("hhh");
+        model1.setName("howie");
         model1.setAge("19");
         model1.setAddress("123456789");
-        model1.setEmail("asfasaf@sakfhak.com");
+        model1.setEmail("123456789@gmail.com");
         list.add(model1);
         ExportInfo model2 = new ExportInfo();
-        model2.setName("hhh");
-        model2.setAge("19");
-        model2.setAddress("123456789");
-        model2.setEmail("asfasaf@sakfhak.com");
+        model2.setName("harry");
+        model2.setAge("20");
+        model2.setAddress("198752233");
+        model2.setEmail("198752233@gmail.com");
         list.add(model2);
-        ExcelUtil.writeExcel(response, list, fileName, sheetName, new ExportInfo());
+        return list;
     }
 }
