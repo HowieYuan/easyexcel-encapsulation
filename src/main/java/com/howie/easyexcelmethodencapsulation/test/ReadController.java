@@ -21,11 +21,17 @@ import java.util.List;
  */
 @RestController
 public class ReadController {
+    /**
+     * 读取 Excel（允许多个 sheet）
+     */
     @RequestMapping(value = "readExcel", method = RequestMethod.POST)
     public Object readExcel(MultipartFile excel) {
         return ExcelUtil.readExcel(excel, new ImportInfo());
     }
 
+    /**
+     * 导出 Excel（一个 sheet）
+     */
     @RequestMapping(value = "writeExcel", method = RequestMethod.GET)
     public void writeExcel(HttpServletResponse response) throws IOException {
         List<ExportInfo> list = getList();
@@ -35,6 +41,9 @@ public class ReadController {
         ExcelUtil.writeExcelWithSheets(response, list, fileName, sheetName, new ExportInfo());
     }
 
+    /**
+     * 导出 Excel（多个 sheet）
+     */
     @RequestMapping(value = "writeExcelWithSheet", method = RequestMethod.GET)
     public void writeExcelWithSheets(HttpServletResponse response) throws IOException {
         List<ExportInfo> list = getList();
