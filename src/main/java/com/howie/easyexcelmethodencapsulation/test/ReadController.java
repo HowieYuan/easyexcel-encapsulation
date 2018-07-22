@@ -38,13 +38,13 @@ public class ReadController {
         String fileName = "一个 Excel 文件";
         String sheetName = "第一个 sheet";
 
-        ExcelUtil.writeExcelWithSheets(response, list, fileName, sheetName, new ExportInfo());
+        ExcelUtil.writeExcel(response, list, fileName, sheetName, new ExportInfo());
     }
 
     /**
      * 导出 Excel（多个 sheet）
      */
-    @RequestMapping(value = "writeExcelWithSheet", method = RequestMethod.GET)
+    @RequestMapping(value = "writeExcelWithSheets", method = RequestMethod.GET)
     public void writeExcelWithSheets(HttpServletResponse response) throws IOException {
         List<ExportInfo> list = getList();
         String fileName = "一个 Excel 文件";
