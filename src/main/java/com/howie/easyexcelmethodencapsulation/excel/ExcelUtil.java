@@ -8,7 +8,10 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -23,19 +26,19 @@ public class ExcelUtil {
     /**
      * 读取 Excel(多个 sheet)
      *
-     * @param excel  文件
-     * @param object 实体类映射，继承 BaseRowModel 类
+     * @param excel    文件
+     * @param rowModel 实体类映射，继承 BaseRowModel 类
      * @return Excel 数据 list
      */
-    public static List<Object> readExcel(MultipartFile excel, BaseRowModel object) {
+    public static List<Object> readExcel(MultipartFile excel, BaseRowModel rowModel) {
         ExcelListener excelListener = new ExcelListener();
         ExcelReader reader = getReader(excel, excelListener);
         if (reader == null) {
             return null;
         }
         for (Sheet sheet : reader.getSheets()) {
-            if (object != null) {
-                sheet.setClazz(object.getClass());
+            if (rowModel != null) {
+                sheet.setClazz(rowModel.getClass());
             }
             reader.read(sheet);
         }
@@ -45,23 +48,32 @@ public class ExcelUtil {
     /**
      * 读取某个 sheet 的 Excel
      *
-     * @param excel   文件
-     * @param object  实体类映射，继承 BaseRowModel 类
-     * @param sheetNo sheet 的序号
-     *                当前版本中：
-     *                XLS 类型文件 sheet 序号为顺序，第一个 sheet 序号为 1
-     *                XLSX 类型 sheet 序号顺序为倒序，即最后一个 sheet 序号为 1
+     * @param excel    文件
+     * @param rowModel 实体类映射，继承 BaseRowModel 类
+     * @param sheetNo  sheet 的序号 从1开始
      * @return Excel 数据 list
      */
-    public static List<Object> readExcel(MultipartFile excel, BaseRowModel object, int sheetNo) {
+    public static List<Object> readExcel(MultipartFile excel, BaseRowModel rowModel, int sheetNo) {
+        return readExcel(excel, rowModel, sheetNo, 1);
+    }
+
+    /**
+     * 读取某个 sheet 的 Excel
+     *
+     * @param excel       文件
+     * @param rowModel    实体类映射，继承 BaseRowModel 类
+     * @param sheetNo     sheet 的序号 从1开始
+     * @param headLineNum 表头行数，默认为1
+     * @return Excel 数据 list
+     */
+    public static List<Object> readExcel(MultipartFile excel, BaseRowModel rowModel, int sheetNo,
+                                         int headLineNum) {
         ExcelListener excelListener = new ExcelListener();
         ExcelReader reader = getReader(excel, excelListener);
         if (reader == null) {
             return null;
         }
-        Sheet sheet = new Sheet(sheetNo);
-        sheet.setClazz(object.getClass());
-        reader.read(sheet);
+        reader.read(new Sheet(sheetNo, headLineNum, rowModel.getClass()));
         return excelListener.getDatas();
     }
 
@@ -75,31 +87,12 @@ public class ExcelUtil {
      * @param object    映射实体类，Excel 模型
      */
     public static void writeExcel(HttpServletResponse response, List<? extends BaseRowModel> list,
-                                  String fileName, String sheetName, BaseRowModel object) throws IOException {
-        //创建本地文件
-        String filePath = fileName + ".xlsx";
-        File dbfFile = new File(filePath);
-        if (!dbfFile.exists() || dbfFile.isDirectory()) {
-            dbfFile.createNewFile();
-        }
-        fileName = new String(filePath.getBytes(), "ISO-8859-1");
-        response.addHeader("Content-Disposition", "filename=" + fileName);
-        OutputStream out = response.getOutputStream();
-        try {
-            ExcelWriter writer = new ExcelWriter(out, ExcelTypeEnum.XLSX);
-            Sheet sheet = new Sheet(1, 0, object.getClass());
-            sheet.setSheetName(sheetName);
-            writer.write(list, sheet);
-            writer.finish();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                out.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+                                  String fileName, String sheetName, BaseRowModel object) {
+        ExcelWriter writer = new ExcelWriter(getOutputStream(fileName, response), ExcelTypeEnum.XLSX);
+        Sheet sheet = new Sheet(1, 0, object.getClass());
+        sheet.setSheetName(sheetName);
+        writer.write(list, sheet);
+        writer.finish();
     }
 
     /**
@@ -112,32 +105,31 @@ public class ExcelUtil {
      * @param object    映射实体类，Excel 模型
      */
     public static ExcelWriterFactroy writeExcelWithSheets(HttpServletResponse response, List<? extends BaseRowModel> list,
-                                                          String fileName, String sheetName, BaseRowModel object) throws IOException {
+                                                          String fileName, String sheetName, BaseRowModel object) {
+        ExcelWriterFactroy writer = new ExcelWriterFactroy(getOutputStream(fileName, response), ExcelTypeEnum.XLSX);
+        Sheet sheet = new Sheet(1, 0, object.getClass());
+        sheet.setSheetName(sheetName);
+        writer.write(list, sheet);
+        return writer;
+    }
+
+    /**
+     * 导出文件时为Writer生成OutputStream
+     */
+    private static OutputStream getOutputStream(String fileName, HttpServletResponse response) {
         //创建本地文件
         String filePath = fileName + ".xlsx";
         File dbfFile = new File(filePath);
-        if (!dbfFile.exists() || dbfFile.isDirectory()) {
-            dbfFile.createNewFile();
-        }
-        fileName = new String(filePath.getBytes(), "ISO-8859-1");
-        response.addHeader("Content-Disposition", "filename=" + fileName);
-        OutputStream out = response.getOutputStream();
-        ExcelWriterFactroy writer = new ExcelWriterFactroy(out, ExcelTypeEnum.XLSX
-        );
         try {
-            Sheet sheet = new Sheet(1, 0, object.getClass());
-            sheet.setSheetName(sheetName);
-            writer.write(list, sheet);
-            return writer;
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                out.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
+            if (!dbfFile.exists() || dbfFile.isDirectory()) {
+                dbfFile.createNewFile();
             }
+            fileName = new String(filePath.getBytes(), "ISO-8859-1");
+            response.addHeader("Content-Disposition", "filename=" + fileName);
+            return response.getOutputStream();
+        } catch (IOException e) {
+            throw new ExcelException("创建文件失败！");
         }
-        return writer;
     }
 
     /**
@@ -152,15 +144,10 @@ public class ExcelUtil {
         if (filename == null || (!filename.toLowerCase().endsWith(".xls") && !filename.toLowerCase().endsWith(".xlsx"))) {
             throw new ExcelException("文件格式错误！");
         }
-        ExcelTypeEnum excelTypeEnum = ExcelTypeEnum.XLSX;
-        if (filename.toLowerCase().endsWith(".xls")) {
-            excelTypeEnum = ExcelTypeEnum.XLS;
-        }
         InputStream inputStream;
         try {
             inputStream = excel.getInputStream();
-            return new ExcelReader(inputStream, excelTypeEnum,
-                    null, excelListener);
+            return new ExcelReader(inputStream, null, excelListener, false);
         } catch (IOException e) {
             e.printStackTrace();
         }

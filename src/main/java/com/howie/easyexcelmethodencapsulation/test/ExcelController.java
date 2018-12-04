@@ -3,6 +3,7 @@ package com.howie.easyexcelmethodencapsulation.test;
 import com.howie.easyexcelmethodencapsulation.excel.ExcelUtil;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,13 +21,22 @@ import java.util.List;
  * @Time 16:56
  */
 @RestController
-public class ReadController {
+public class ExcelController {
     /**
      * 读取 Excel（允许多个 sheet）
      */
-    @RequestMapping(value = "readExcel", method = RequestMethod.POST)
-    public Object readExcel(MultipartFile excel) {
+    @RequestMapping(value = "readExcelWithSheets", method = RequestMethod.POST)
+    public Object readExcelWithSheets(MultipartFile excel) {
         return ExcelUtil.readExcel(excel, new ImportInfo());
+    }
+
+    /**
+     * 读取 Excel（指定某个 sheet）
+     */
+    @RequestMapping(value = "readExcel", method = RequestMethod.POST)
+    public Object readExcel(MultipartFile excel, int sheetNo,
+                            @RequestParam(defaultValue = "1") int headLineNum) {
+        return ExcelUtil.readExcel(excel, new ImportInfo(), sheetNo, headLineNum);
     }
 
     /**

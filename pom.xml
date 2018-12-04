@@ -37,9 +37,16 @@
 		</dependency>
 
 		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>easyexcel</artifactId>
-			<version>1.0.2</version>
+			<version>1.1.2-beta4</version>
 		</dependency>
 	</dependencies>
 
