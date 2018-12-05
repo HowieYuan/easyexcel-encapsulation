@@ -13,7 +13,7 @@ easyexcel 项目地址 ：https://github.com/alibaba/easyexcel
 <dependency>
 	<groupId>com.alibaba</groupId>
 	<artifactId>easyexcel</artifactId>
-	<version>1.0.2</version>
+	<version>1.1.2-beta4</version>
 </dependency>
 ```
 
