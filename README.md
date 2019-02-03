@@ -1,4 +1,4 @@
-# easyexcel-method-encapsulation
+# easyexcel-encapsulation
 easyexcel 项目地址 ：https://github.com/alibaba/easyexcel
 
 #### 对 easyexcel 进行了方法的封装，可以做到一个函数完成简单的读取和导出
