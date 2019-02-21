@@ -8,10 +8,7 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -146,7 +143,7 @@ public class ExcelUtil {
         }
         InputStream inputStream;
         try {
-            inputStream = excel.getInputStream();
+            inputStream = new BufferedInputStream(excel.getInputStream());
             return new ExcelReader(inputStream, null, excelListener, false);
         } catch (IOException e) {
             e.printStackTrace();
