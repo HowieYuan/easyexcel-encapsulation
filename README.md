@@ -8,7 +8,7 @@ easyexcel 项目地址 ：https://github.com/alibaba/easyexcel
 ---
 
 # 一. 依赖
-首先是添加该项目的依赖，目前的版本是 1.0.2
+首先是添加该项目的依赖，目前的版本是 1.1.2-beta4
 ```
 <dependency>
 	<groupId>com.alibaba</groupId>
